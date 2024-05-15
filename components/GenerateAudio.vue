@@ -26,7 +26,8 @@ async function save() {
                     types: [
                     {
                         description: "White Noise Generator",
-                        accept: { "audio/mpeg": [".webm"] },
+                        accept: { "audio/webm": [".webm"] },
+                        suggestedName: Date.now()
                     },
                     ],
                 };
@@ -51,7 +52,6 @@ const stopAudio = () => {
     const el = document.getElementsByClassName("random-audio")
     console.log(el)
     for(var i = 0; i< el.length; ++i) {
-        console.log(el[i])
         el[i].pause()
     }
 }
@@ -92,12 +92,9 @@ const  generate = async () => {
             
             recorder = new MediaRecorder(audioNode.stream, options)
             recorder.ondataavailable = (e) => {
-                console.log('DATA')
                 chunks.push(e.data);         
             };
             recorder.onstop = async (e) => {
-                console.log("data available after MediaRecorder.stop() called.");
-
                 blob = new File(chunks, 'white-noise',{ type: recorder.mimeType });
                
                 console.log("recorder stopped", blob);
