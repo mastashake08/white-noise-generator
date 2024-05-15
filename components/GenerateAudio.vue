@@ -1,7 +1,7 @@
 <template>
     <button  v-if="!isPlaying" @click="generate">Generate Audio</button>
     <button v-else @click="stopAudio">Stop Audio</button>
-    <button v-if="isDone" @click="save">Save Audio</button>
+    <!-- <button v-if="isDone" @click="save">Save Audio</button> -->
     <br/>
     <GenerativeCanvas />
 </template>
@@ -32,8 +32,8 @@ async function save() {
                     },
                     ],
                 };
-         fh = await showSaveFilePicker(opts); 
-    await writeFile(fh, blob)
+         //fh = await showSaveFilePicker(opts); 
+    //await writeFile(fh, blob)
 }
 async function writeFile(fileHandle, contents) {
   // Create a FileSystemWritableFileStream to write to.
@@ -93,16 +93,16 @@ const  generate = async () => {
             
             stream.addTrack(audioTrack) 
             
-            recorder = new MediaRecorder(audioNode.stream, options)
-            recorder.ondataavailable = (e) => {
-                chunks.push(e.data);         
-            };
-            recorder.onstop = async (e) => {
-                blob = new File(chunks, 'white-noise',{ type: recorder.mimeType });
+            // recorder = new MediaRecorder(audioNode.stream, options)
+            // recorder.ondataavailable = (e) => {
+            //     chunks.push(e.data);         
+            // };
+            // recorder.onstop = async (e) => {
+            //     blob = new File(chunks, 'white-noise',{ type: recorder.mimeType });
                
-                console.log("recorder stopped", blob);
+            //     console.log("recorder stopped", blob);
                 
-                };
+            //     };
                 el.srcObject = stream
             const audioEl = audioCtx.value.createMediaElementSource(el)
             
@@ -110,7 +110,7 @@ const  generate = async () => {
             analyser.value.connect(audioNode)
            
                 
-            recorder.start();
+            //recorder.start();
             source.start();
             el.play().then(() => {
             /* Set up media session controls, as shown above. */
