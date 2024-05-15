@@ -21,7 +21,7 @@ onMounted(() => {
 </script>
 <style>
     canvas {
-        filter: url('/fade.svg#fadeFilter');
+        filter: url('/white-noise-generator/fade.svg#fadeFilter');
         background-color: black;
         animation:fading 10s infinite
     }

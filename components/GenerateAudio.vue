@@ -56,6 +56,7 @@ const stopAudio = () => {
         el[i].pause()
         isPlaying.value = false
     }
+    stop()
 }
 const  generate = async () => {
     try {
@@ -65,7 +66,7 @@ const  generate = async () => {
         isDone.value = false
         const stream = canvas.value.captureStream(30)
         
-        const duration = 3000
+        const duration = 3600
         const channels = 2
         audioCtx.value = new AudioContext()
         analyser.value = audioCtx.value.createAnalyser();
@@ -107,7 +108,13 @@ const  generate = async () => {
             
             audioEl.connect(audioCtx.value.destination)
             analyser.value.connect(audioNode)
-            if ("mediaSession" in navigator) {
+           
+                
+            recorder.start();
+            source.start();
+            el.play().then(() => {
+            /* Set up media session controls, as shown above. */
+            navigator.mediaSession.playbackState = "playing";
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: "White Noise",
                     artist: "Jyrone Parker",
@@ -182,15 +189,13 @@ const  generate = async () => {
                 navigator.mediaSession.setActionHandler("hangup", () => {
                     /* Code excerpted. */
                 });
-            }
-            recorder.start();
-            source.start();
-            el.play();
+            
+            })
+            .catch((error) => {
+            console.error(error);
+            });;
             isPlaying.value = true
            
-            setTimeout(() => {
-                stop()
-            }, 30000);
     } catch (error) {
         console.log(error)
     }
