@@ -1,13 +1,13 @@
 <template>
     <button @click="generate">Generate Audio</button>
-    
-    
+    <button v-if="isDone" @click="save">Save Audio</button>
     <GenerativeCanvas />
 </template>
 <script setup lang="ts">
 const audioCtx = useState('audioCtx');
 const analyser = useState('analyser');
 const canvas = useState('canvas')
+const isDone = ref(false)
 let recorder;
 let blob;
 let fh;
@@ -19,6 +19,16 @@ const options = {
       mimeType:  "audio/webm;codecs=opus",
 };
 async function save() {
+
+    const opts = {
+                    types: [
+                    {
+                        description: "White Noise Generator",
+                        accept: { "audio/mpeg": [".webm"] },
+                    },
+                    ],
+                };
+         fh = await showSaveFilePicker(opts); 
     await writeFile(fh, blob)
 }
 async function writeFile(fileHandle, contents) {
@@ -33,22 +43,14 @@ async function writeFile(fileHandle, contents) {
 }
 const stop = () => {
     recorder.stop()
-
+    isDone.value = true
 }
 const  generate = async () => {
     try {
-        const opts = {
-                    types: [
-                    {
-                        description: "White Noise Generator",
-                        accept: { "audio/mpeg": [".webm"] },
-                    },
-                    ],
-                };
-         fh = await showSaveFilePicker(opts); 
+        isDone.value = false
         const stream = canvas.value.captureStream(30)
         
-        const duration = 30
+        const duration = 5000
         const channels = 2
         audioCtx.value = new AudioContext()
         analyser.value = audioCtx.value.createAnalyser();
@@ -78,28 +80,24 @@ const  generate = async () => {
             const audioTrack = audioNode.stream.getAudioTracks()[0]
             
             stream.addTrack(audioTrack) 
-            audioTrack.onended = (e) => {
-                console.log(e)
-            };
+            
             recorder = new MediaRecorder(audioNode.stream, options)
-            console.log(stream.getTracks())
             recorder.ondataavailable = (e) => {
                 console.log('DATA')
-                chunks.push(e.data);
-                console.log(chunks)
-                
+                chunks.push(e.data);         
             };
             recorder.onstop = async (e) => {
                 console.log("data available after MediaRecorder.stop() called.");
 
-                blob = new Blob(chunks, { type: recorder.mimeType });
+                blob = new File(chunks, 'white-noise',{ type: recorder.mimeType });
                
                 console.log("recorder stopped", blob);
-                save()
+                
                 };
             analyser.value.connect(audioNode)
+            source.connect(audioCtx.value.destination)
             recorder.start();
-            source.start();
+            source.start(0,0,duration);
             setTimeout(() => {
                 stop()
             }, 30000);
