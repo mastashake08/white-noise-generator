@@ -66,7 +66,7 @@ const  generate = async () => {
         isDone.value = false
         const stream = canvas.value.captureStream(30)
         
-        const duration = 3600
+        const duration = 5
         const channels = 2
         audioCtx.value = new AudioContext()
         analyser.value = audioCtx.value.createAnalyser();
