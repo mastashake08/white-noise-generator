@@ -1,6 +1,6 @@
-# Nuxt 3 Minimal Starter
+# White Noise Generator
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Personal WHite Noise Generator for work and concentration.
 
 ## Setup
 
