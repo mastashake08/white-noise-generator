@@ -1,5 +1,6 @@
 <template>
     <button @click="generate">Generate Audio</button>
+    <button @click="stopAudio">Stop Audio</button>
     <button v-if="isDone" @click="save">Save Audio</button>
     <br/>
     <GenerativeCanvas />
@@ -46,10 +47,18 @@ const stop = () => {
     recorder.stop()
     isDone.value = true
 }
+const stopAudio = () => {
+    const el = document.getElementsByClassName("random-audio")
+    console.log(el)
+    for(var i = 0; i< el.length; ++i) {
+        console.log(el[i])
+        el[i].pause()
+    }
+}
 const  generate = async () => {
     try {
         const el = document.createElement("audio")
-        el.id = "random-audio"
+        el.className = "random-audio"
         document.body.appendChild(el)
         isDone.value = false
         const stream = canvas.value.captureStream(30)
@@ -174,7 +183,7 @@ const  generate = async () => {
                 navigator.mediaSession.setActionHandler("hangup", () => {
                     /* Code excerpted. */
                 });
-                }
+            }
             recorder.start();
             source.start();
             el.play();

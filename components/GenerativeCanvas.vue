@@ -1,11 +1,12 @@
 <template>
-   <canvas ref="canvas" width="1080" height="720" ></canvas>
-
+    <canvas v-show="true" ref="canvas" width="1080" height="720" ></canvas>
+   
 </template>
 <script setup>
 const canvas = ref('canvas')
+const vid = ref('video')
 onMounted(() => {
-
+    const video = useState('video-display',() => vid.value)
     const c = useState('canvas', () => canvas.value)
     const img = new Image() 
     const url = '/space.jpg'
