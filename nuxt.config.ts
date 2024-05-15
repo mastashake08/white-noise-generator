@@ -27,6 +27,7 @@ export default defineNuxtConfig({
       short_name: 'White Noise',
       description: 'A random white noise generator for sleep and work.',
       theme_color: '#000000',
+      
     },
 
     workbox: {

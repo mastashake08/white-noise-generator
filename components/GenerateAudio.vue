@@ -27,7 +27,7 @@ async function save() {
                     {
                         description: "White Noise Generator",
                         accept: { "audio/webm": [".webm"] },
-                        suggestedName: Date.now()
+                        suggestedName: Date.now()+'.webm'
                     },
                     ],
                 };
