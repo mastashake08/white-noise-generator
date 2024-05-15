@@ -1,6 +1,7 @@
 <template>
     <button @click="generate">Generate Audio</button>
     <button v-if="isDone" @click="save">Save Audio</button>
+    <br/>
     <GenerativeCanvas />
 </template>
 <script setup lang="ts">
@@ -47,10 +48,13 @@ const stop = () => {
 }
 const  generate = async () => {
     try {
+        const el = document.createElement("audio")
+        el.id = "random-audio"
+        document.body.appendChild(el)
         isDone.value = false
         const stream = canvas.value.captureStream(30)
         
-        const duration = 5000
+        const duration = 3000
         const channels = 2
         audioCtx.value = new AudioContext()
         analyser.value = audioCtx.value.createAnalyser();
@@ -66,15 +70,11 @@ const  generate = async () => {
             }
     
             }
-            const source = audioCtx.value.createBufferSource();
-            // set the buffer in the AudioBufferSourceNode
-            source.buffer = myArrayBuffer;
-            source.loop = true
-            // connect the AudioBufferSourceNode to the
-            // destination so we can hear the sound
-            source.connect(analyser.value);
+
+            const source = createBufferSource(myArrayBuffer, analyser.value)
+            
             // start the source playing
-            source.loop = false;
+            source.loop = true;
     
             const audioNode = audioCtx.value.createMediaStreamDestination();
             const audioTrack = audioNode.stream.getAudioTracks()[0]
@@ -94,10 +94,91 @@ const  generate = async () => {
                 console.log("recorder stopped", blob);
                 
                 };
+                el.srcObject = stream
+            const audioEl = audioCtx.value.createMediaElementSource(el)
+            
+            audioEl.connect(audioCtx.value.destination)
             analyser.value.connect(audioNode)
-            source.connect(audioCtx.value.destination)
+            if ("mediaSession" in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: "White Noise",
+                    artist: "Jyrone Parker",
+                    album: "Random White Noise",
+                    artwork: [
+                    {
+                        src: "https://dummyimage.com/96x96",
+                        sizes: "96x96",
+                        type: "image/png",
+                    },
+                    {
+                        src: "https://dummyimage.com/128x128",
+                        sizes: "128x128",
+                        type: "image/png",
+                    },
+                    {
+                        src: "https://dummyimage.com/192x192",
+                        sizes: "192x192",
+                        type: "image/png",
+                    },
+                    {
+                        src: "https://dummyimage.com/256x256",
+                        sizes: "256x256",
+                        type: "image/png",
+                    },
+                    {
+                        src: "https://dummyimage.com/384x384",
+                        sizes: "384x384",
+                        type: "image/png",
+                    },
+                    {
+                        src: "https://dummyimage.com/512x512",
+                        sizes: "512x512",
+                        type: "image/png",
+                    },
+                    ],
+                });
+
+                navigator.mediaSession.setActionHandler("play", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("pause", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("stop", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("seekbackward", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("seekforward", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("seekto", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("previoustrack", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("nexttrack", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("skipad", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("togglecamera", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("togglemicrophone", () => {
+                    /* Code excerpted. */
+                });
+                navigator.mediaSession.setActionHandler("hangup", () => {
+                    /* Code excerpted. */
+                });
+                }
             recorder.start();
-            source.start(0,0,duration);
+            source.start();
+            el.play();
+           
             setTimeout(() => {
                 stop()
             }, 30000);
@@ -107,4 +188,15 @@ const  generate = async () => {
 }
 
 
+
+function createBufferSource(buffer, connect) {
+    const source = audioCtx.value.createBufferSource();
+            // set the buffer in the AudioBufferSourceNode
+            source.buffer = buffer;
+            source.loop = true
+            // connect the AudioBufferSourceNode to the
+            // destination so we can hear the sound
+            source.connect(connect);
+    return source;
+}
 </script>
