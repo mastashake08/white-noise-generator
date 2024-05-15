@@ -11,7 +11,12 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@vite-pwa/nuxt'],
+  modules: [
+    '@vite-pwa/nuxt',
+    '@nuxtjs/google-adsense',
+    '@nuxtjs/tailwindcss',
+    '@unlok-co/nuxt-stripe',
+  ],
 
   pwa: {
     registerType: 'autoUpdate',

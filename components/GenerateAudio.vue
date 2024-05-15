@@ -1,6 +1,6 @@
 <template>
-    <button @click="generate">Generate Audio</button>
-    <button @click="stopAudio">Stop Audio</button>
+    <button  v-if="!isPlaying" @click="generate">Generate Audio</button>
+    <button v-else @click="stopAudio">Stop Audio</button>
     <button v-if="isDone" @click="save">Save Audio</button>
     <br/>
     <GenerativeCanvas />
@@ -10,6 +10,7 @@ const audioCtx = useState('audioCtx');
 const analyser = useState('analyser');
 const canvas = useState('canvas')
 const isDone = ref(false)
+const isPlaying = ref(false)
 let recorder;
 let blob;
 let fh;
@@ -53,6 +54,7 @@ const stopAudio = () => {
     console.log(el)
     for(var i = 0; i< el.length; ++i) {
         el[i].pause()
+        isPlaying.value = false
     }
 }
 const  generate = async () => {
@@ -184,6 +186,7 @@ const  generate = async () => {
             recorder.start();
             source.start();
             el.play();
+            isPlaying.value = true
            
             setTimeout(() => {
                 stop()
