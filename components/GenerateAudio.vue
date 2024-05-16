@@ -23,11 +23,11 @@ const chunks = []
 const options = {
       audioBitsPerSecond: 128000,
       videoBitsPerSecond: 2500000,
-      mimeType:  "audio/webm;codecs=opus",
+      mimeType:  "audio/webm",
 };
 async function save() {
-
-    const opts = {
+    try {
+        if("showSaveFilePicker" in window)   {    const opts = {
                     types: [
                     {
                         description: "White Noise Generator",
@@ -36,8 +36,21 @@ async function save() {
                     },
                     ],
                 };
-         //fh = await showSaveFilePicker(opts); 
-    //await writeFile(fh, blob)
+         fh = await window.showSaveFilePicker(opts); 
+         await writeFile(fh, blob) 
+        } else {
+            const blobUrl = URL.createObjectURL(blob);
+            var link = document.createElement("a"); // Or maybe get it from the current document
+            link.href = blobUrl;
+            link.download = Date.now()+'.webm';
+
+            document.body.appendChild(link); // Or append it whereever you want
+            document.querySelector('a').click()
+        }
+    } catch (error) {
+        console.log(error)
+    }
+    
 }
 function interleave (inputL, inputR) {
   var length = inputL.length + inputR.length
@@ -66,6 +79,7 @@ async function writeFile(fileHandle, contents) {
 const stop = () => {
     recorder.stop()
     isDone.value = true
+    save()
 }
 const stopAudio = () => {
     const el = document.getElementsByClassName("random-audio")
@@ -98,15 +112,14 @@ const  generate = async () => {
             // Math.random() is in [0; 1.0]
             // audio needs to be in [-1.0; 1.0]
             nowBuffering[i] = Math.random() * 2 - 1;
-            }
-    
-            }
-            console.log(myArrayBuffer)
-            console.log([myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1)])
+        }
+    }
+        
             const source = createBufferSource(myArrayBuffer, analyser.value)
             //const inter = interleave(myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1))
             // console.log(inter)
-            // blob = new Blob([inter],{ type: 'audio/webm' });
+            //  blob = new Blob(chunks, {type: 'audio/webm'});
+            //  await save()
             // console.log(await blob.arrayBuffer())
             // start the source playing
             source.loop = true;
@@ -118,7 +131,7 @@ const  generate = async () => {
             
             recorder = new MediaRecorder(audioNode.stream, options)
             recorder.ondataavailable = (e) => {
-                chunks.push(e.data);         
+                chunks.push(e.data);      
             };
             recorder.onstop = async (e) => {
                 blob = new File(chunks, 'white-noise.webm',{ type: recorder.mimeType });
@@ -133,10 +146,9 @@ const  generate = async () => {
             analyser.value.connect(audioNode)
            
                 
-            recorder.start();
+            recorder.start(timeslice);
             source.start();
             el.play().then(() => {
-                console.log(navigator.mediaSession)
             /* Set up media session controls, as shown above. */
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: "White Noise",
