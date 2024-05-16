@@ -104,10 +104,10 @@ const  generate = async () => {
             console.log(myArrayBuffer)
             console.log([myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1)])
             const source = createBufferSource(myArrayBuffer, analyser.value)
-            const inter = interleave(myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1))
+            //const inter = interleave(myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1))
             // console.log(inter)
-            blob = new Blob([inter],{ type: 'audio/webm' });
-            console.log(await blob.arrayBuffer())
+            // blob = new Blob([inter],{ type: 'audio/webm' });
+            // console.log(await blob.arrayBuffer())
             // start the source playing
             source.loop = true;
     
