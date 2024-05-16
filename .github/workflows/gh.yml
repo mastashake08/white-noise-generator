@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+env:
+  PROXY_URL: ${{ secrets.PROXY_URL }}
+  STRIPE_KEY: ${{ secrets.STRIPE_KEY }}
 jobs:
   build:
     runs-on: ubuntu-latest
