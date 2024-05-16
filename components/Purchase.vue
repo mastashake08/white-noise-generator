@@ -12,13 +12,17 @@
   </template>
   
   <script setup lang="ts">
+  const route = useRoute()
   // Call the composable to get the Stripe instance
   const stripe = await useClientStripe();
   const buy = async() => {
     
     const appearance = { /* appearance */ }
     const options = { /* options */
-        emailRequired: true,
+        buttonType: {
+            applePay: 'donate',
+            googlePay: 'donate',
+        }
      }
     const elements = stripe.value.elements({
     mode: 'payment',
@@ -44,16 +48,16 @@
     const res = await fetch('/api/create-intent', {
         method: 'POST',
     });
-    const {client_secret: clientSecret} = await res.json();
+    const {client_secret: clientSecret } = await res.json();
 
-    const {error} = await stripe.confirmPayment({
+    const {error} = await stripe.value.confirmPayment({
         // `elements` instance used to create the Express Checkout Element
         elements,
         // `clientSecret` from the created PaymentIntent
         clientSecret,
         confirmParams: {
-        return_url: 'https://example.com/order/123/complete',
-        },
+        return_url: location.href
+        }
     });
 
     if (error) {

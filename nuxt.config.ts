@@ -5,11 +5,12 @@ export default defineNuxtConfig({
         proxy: {
             '/api': {
                 target: process.env.PROXY_URL,
-                changeOrigin: true
-              }
+                changeOrigin: true,
+                rewrite: path => path.replace(/^\/api/, '')
           }
       }
-  },
+    },
+},
   devServer: {
     https: {
       key: './server.key',
@@ -79,5 +80,5 @@ export default defineNuxtConfig({
       periodicSyncForUpdates: 3600,
       installPrompt: true,
     },
-  },
+  }
 })
