@@ -9,7 +9,7 @@ onMounted(() => {
     const video = useState('video-display',() => vid.value)
     const c = useState('canvas', () => canvas.value)
     const img = new Image() 
-    const url = '/white-noise-generator/space.jpg'
+    const url = '/space.jpg'
     const ctx = canvas.value.getContext('2d')
    
     img.src = url
@@ -21,7 +21,7 @@ onMounted(() => {
 </script>
 <style>
     canvas {
-        filter: url('/white-noise-generator/fade.svg#fadeFilter');
+        filter: url('fade.svg#fadeFilter');
         background-color: black;
         animation:fading 10s infinite
     }
