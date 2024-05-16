@@ -1,9 +1,12 @@
 <template>
-    <button  v-if="!isPlaying" @click="generate">Generate Audio</button>
-    <button v-else @click="stopAudio">Stop Audio</button>
-    <!-- <button v-if="isDone" @click="save">Save Audio</button> -->
-    <br/>
-    <GenerativeCanvas />
+    <div class="container mx-auto">
+        <div class="items-center text-center" id="buttons">
+            <button class="rounded-md bg-blue-500 px-5 my-2" v-if="!isPlaying" @click="generate">Generate Audio</button>
+            <button class="rounded-md bg-red-500 px-5 my-2" v-else @click="stopAudio">Stop Audio</button>
+        </div>
+        <GenerativeCanvas class="mx-auto"/>
+    </div>
+   
 </template>
 <script setup lang="ts">
 const audioCtx = useState('audioCtx');
@@ -35,6 +38,20 @@ async function save() {
          //fh = await showSaveFilePicker(opts); 
     //await writeFile(fh, blob)
 }
+function interleave (inputL, inputR) {
+  var length = inputL.length + inputR.length
+  var result = new Float32Array(length)
+
+  var index = 0
+  var inputIndex = 0
+
+  while (index < length) {
+    result[index++] = inputL[inputIndex]
+    result[index++] = inputR[inputIndex]
+    inputIndex++
+  }
+  return result
+}
 async function writeFile(fileHandle, contents) {
   // Create a FileSystemWritableFileStream to write to.
   const writable = await fileHandle.createWritable();
@@ -62,11 +79,12 @@ const  generate = async () => {
     try {
         const el = document.createElement("audio")
         el.className = "random-audio"
-        document.body.appendChild(el)
+        const btns = document.getElementById('buttons')
+        btns.appendChild(el)
         isDone.value = false
         const stream = canvas.value.captureStream(30)
         
-        const duration = 5
+        const duration = 600
         const channels = 2
         audioCtx.value = new AudioContext()
         analyser.value = audioCtx.value.createAnalyser();
@@ -82,9 +100,13 @@ const  generate = async () => {
             }
     
             }
-
+            console.log(myArrayBuffer)
+            console.log([myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1)])
             const source = createBufferSource(myArrayBuffer, analyser.value)
-            
+            // const inter = interleave(myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1))
+            // console.log(inter)
+            blob = new Blob([myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1)],{ type: 'audio/webm' });
+            console.log(await blob.arrayBuffer())
             // start the source playing
             source.loop = true;
     
@@ -113,48 +135,20 @@ const  generate = async () => {
             //recorder.start();
             source.start();
             el.play().then(() => {
+                console.log(navigator.mediaSession)
             /* Set up media session controls, as shown above. */
-            navigator.mediaSession.playbackState = "playing";
+            //navigator.mediaSession.playbackState = "playing";
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: "White Noise",
                     artist: "Jyrone Parker",
                     album: "Random White Noise",
-                    artwork: [
-                    {
-                        src: "https://dummyimage.com/96x96",
-                        sizes: "96x96",
-                        type: "image/png",
-                    },
-                    {
-                        src: "https://dummyimage.com/128x128",
-                        sizes: "128x128",
-                        type: "image/png",
-                    },
-                    {
-                        src: "https://dummyimage.com/192x192",
-                        sizes: "192x192",
-                        type: "image/png",
-                    },
-                    {
-                        src: "https://dummyimage.com/256x256",
-                        sizes: "256x256",
-                        type: "image/png",
-                    },
-                    {
-                        src: "https://dummyimage.com/384x384",
-                        sizes: "384x384",
-                        type: "image/png",
-                    },
-                    {
-                        src: "https://dummyimage.com/512x512",
-                        sizes: "512x512",
-                        type: "image/png",
-                    },
-                    ],
                 });
 
                 navigator.mediaSession.setActionHandler("play", () => {
                     /* Code excerpted. */
+                    const el = document.getElementsByClassName("random-audio")
+                    el[0].play()
+
                 });
                 navigator.mediaSession.setActionHandler("pause", () => {
                     /* Code excerpted. */
