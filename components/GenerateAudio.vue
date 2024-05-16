@@ -3,6 +3,7 @@
         <div class="items-center text-center" id="buttons">
             <button class="rounded-md bg-blue-500 px-5 my-2" v-if="!isPlaying" @click="generate">Generate Audio</button>
             <button class="rounded-md bg-red-500 px-5 my-2" v-else @click="stopAudio">Stop Audio</button>
+            <Purchase/>
         </div>
         <GenerativeCanvas class="mx-auto"/>
     </div>
@@ -103,9 +104,9 @@ const  generate = async () => {
             console.log(myArrayBuffer)
             console.log([myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1)])
             const source = createBufferSource(myArrayBuffer, analyser.value)
-            // const inter = interleave(myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1))
+            const inter = interleave(myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1))
             // console.log(inter)
-            blob = new Blob([myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1)],{ type: 'audio/webm' });
+            blob = new Blob([inter],{ type: 'audio/webm' });
             console.log(await blob.arrayBuffer())
             // start the source playing
             source.loop = true;
@@ -115,16 +116,16 @@ const  generate = async () => {
             
             stream.addTrack(audioTrack) 
             
-            // recorder = new MediaRecorder(audioNode.stream, options)
-            // recorder.ondataavailable = (e) => {
-            //     chunks.push(e.data);         
-            // };
-            // recorder.onstop = async (e) => {
-            //     blob = new File(chunks, 'white-noise',{ type: recorder.mimeType });
+            recorder = new MediaRecorder(audioNode.stream, options)
+            recorder.ondataavailable = (e) => {
+                chunks.push(e.data);         
+            };
+            recorder.onstop = async (e) => {
+                blob = new File(chunks, 'white-noise.webm',{ type: recorder.mimeType });
                
-            //     console.log("recorder stopped", blob);
+                console.log("recorder stopped", blob);
                 
-            //     };
+                };
                 el.srcObject = stream
             const audioEl = audioCtx.value.createMediaElementSource(el)
             
@@ -132,22 +133,24 @@ const  generate = async () => {
             analyser.value.connect(audioNode)
            
                 
-            //recorder.start();
+            recorder.start();
             source.start();
             el.play().then(() => {
                 console.log(navigator.mediaSession)
             /* Set up media session controls, as shown above. */
-            //navigator.mediaSession.playbackState = "playing";
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: "White Noise",
                     artist: "Jyrone Parker",
                     album: "Random White Noise",
                 });
-
+                navigator.mediaSession.playbackState = "playing";
+                
                 navigator.mediaSession.setActionHandler("play", () => {
                     /* Code excerpted. */
                     const el = document.getElementsByClassName("random-audio")
                     el[0].play()
+                    navigator.mediaSession.playbackState = "playing";
+                
 
                 });
                 navigator.mediaSession.setActionHandler("pause", () => {

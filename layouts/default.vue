@@ -47,6 +47,8 @@
           Cancel
         </button>
       </div>
+
+    <ColorMode/>
     </ClientOnly>
   </main>
 </template>

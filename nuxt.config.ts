@@ -1,8 +1,22 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  vite: {
+    server: {
+        proxy: {
+            '/api': {
+                target: 'http://api.server.local',
+                changeOrigin: true
+              }
+          }
+      }
+  },
+  devServer: {
+    https: {
+      key: './server.key',
+      cert: './server.crt'
+    }
+  },
   app: {
-
     baseURL: '/white-noise-generator/',
   },
   nitro: {
@@ -11,13 +25,23 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: [
-    '@vite-pwa/nuxt',
-    '@nuxtjs/google-adsense',
-    '@nuxtjs/tailwindcss',
-    '@unlok-co/nuxt-stripe',
-  ],
-
+  modules: ['@vite-pwa/nuxt', '@nuxtjs/google-adsense', '@nuxtjs/tailwindcss', '@unlok-co/nuxt-stripe', '@nuxtjs/color-mode'],
+  stripe: {
+    // Server
+    server: {
+      key: "sk_test_123",
+      options: {
+        // your api options override for stripe server side
+        // https://github.com/stripe/stripe-node?tab=readme-ov-file#configuration
+      },
+      // CLIENT
+    },
+    client: {
+      key: process.env.STRIPE_KEY,
+      // your api options override for stripe client side https://stripe.com/docs/js/initializing#init_stripe_js-options
+      options: {},
+    },
+  },
   pwa: {
     registerType: 'autoUpdate',
     injectRegister: false,
