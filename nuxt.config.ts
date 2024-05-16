@@ -4,7 +4,7 @@ export default defineNuxtConfig({
     server: {
         proxy: {
             '/api': {
-                target: 'http://api.server.local',
+                target: process.env.PROXY_URL,
                 changeOrigin: true
               }
           }
