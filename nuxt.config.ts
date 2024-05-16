@@ -18,7 +18,7 @@ export default defineNuxtConfig({
     }
   },
   app: {
-    baseURL: '/white-noise-generator/',
+    baseURL: process.env.BASEURL,
   },
   nitro: {
     prerender: {
