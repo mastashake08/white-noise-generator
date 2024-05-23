@@ -3,20 +3,18 @@
    
 </template>
 <script setup>
+import matrix from "cmatrix/dist/matrix";
 const canvas = ref('canvas')
 const vid = ref('video')
 onMounted(() => {
     const video = useState('video-display',() => vid.value)
     const c = useState('canvas', () => canvas.value)
-    const img = new Image() 
-    const url = '/space.jpg'
-    const ctx = canvas.value.getContext('2d')
-   
-    img.src = url
-    img.addEventListener("load", (e) => {
-        ctx.drawImage(img, 0, 0, 1080, 720)
-    });
-    console.log(img)
+    matrix(canvas.value, {
+        chars: matrix.range(0x30A1, 0x30F6).concat(matrix.range(0x0030, 0x0039)),
+        font_size: 16,
+        width: canvas.value.width,
+        height: canvas.value.height
+    })
 })
 </script>
 <style>

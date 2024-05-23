@@ -4,8 +4,9 @@
             <button class="rounded-md bg-blue-500 px-5 my-2" v-if="!isPlaying" @click="generate">Generate Audio</button>
             <button class="rounded-md bg-red-500 px-5 my-2" v-else @click="stopAudio">Stop Audio</button>
             <Purchase/>
+
+            <GenerativeCanvas class="mx-auto" v-show="false"/>
         </div>
-        <GenerativeCanvas class="mx-auto"/>
     </div>
    
 </template>
@@ -18,12 +19,12 @@ const isPlaying = ref(false)
 let recorder;
 let blob;
 let fh;
-const timeslice = 1000
+const timeslice = 5000
 const chunks = []
 const options = {
       audioBitsPerSecond: 128000,
       videoBitsPerSecond: 2500000,
-      mimeType:  "audio/webm",
+      mimeType:  "video/webm",
 };
 async function save() {
     try {
@@ -83,7 +84,6 @@ const stop = () => {
 }
 const stopAudio = () => {
     const el = document.getElementsByClassName("random-audio")
-    console.log(el)
     for(var i = 0; i< el.length; ++i) {
         el[i].pause()
         isPlaying.value = false
@@ -92,19 +92,19 @@ const stopAudio = () => {
 }
 const  generate = async () => {
     try {
-        const el = document.createElement("audio")
-        el.className = "random-audio"
+        const el = document.createElement("video")
+        el.className = "random-audio  text-center mx-auto"
         const btns = document.getElementById('buttons')
         btns.appendChild(el)
         isDone.value = false
-        const stream = canvas.value.captureStream(30)
+        const stream = canvas.value.captureStream(60)
         
-        const duration = 600
+        const duration = 10
         const channels = 2
         audioCtx.value = new AudioContext()
         analyser.value = audioCtx.value.createAnalyser();
-        const frameCount = audioCtx.value.sampleRate * duration;
-        const myArrayBuffer = audioCtx.value.createBuffer(2, frameCount, audioCtx.value.sampleRate);
+        const frameCount = 96000 * duration;
+        const myArrayBuffer = audioCtx.value.createBuffer(2, frameCount, 96000);
         for (let channel = 0; channel < channels; channel++) {
             // This gives us the actual ArrayBuffer that contains the data
             const nowBuffering = myArrayBuffer.getChannelData(channel);
@@ -116,12 +116,7 @@ const  generate = async () => {
     }
         
             const source = createBufferSource(myArrayBuffer, analyser.value)
-            //const inter = interleave(myArrayBuffer.getChannelData(0),myArrayBuffer.getChannelData(1))
-            // console.log(inter)
-            //  blob = new Blob(chunks, {type: 'audio/webm'});
-            //  await save()
-            // console.log(await blob.arrayBuffer())
-            // start the source playing
+           
             source.loop = true;
     
             const audioNode = audioCtx.value.createMediaStreamDestination();
@@ -129,14 +124,14 @@ const  generate = async () => {
             
             stream.addTrack(audioTrack) 
             
-            recorder = new MediaRecorder(audioNode.stream, options)
+            recorder = new MediaRecorder(stream, options)
             recorder.ondataavailable = (e) => {
                 chunks.push(e.data);      
             };
             recorder.onstop = async (e) => {
                 blob = new File(chunks, 'white-noise.webm',{ type: recorder.mimeType });
-               
-                console.log("recorder stopped", blob);
+                isDone.value = true
+                save()
                 
                 };
                 el.srcObject = stream
@@ -145,10 +140,16 @@ const  generate = async () => {
             audioEl.connect(audioCtx.value.destination)
             analyser.value.connect(audioNode)
            
-                
+            
+              
             recorder.start(timeslice);
             source.start();
+            setTimeout(()=>{
+                recorder.stop()
+                source.stop()
+            }, 360000)
             el.play().then(() => {
+                el.requestPictureInPicture()  
             /* Set up media session controls, as shown above. */
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: "White Noise",
@@ -161,15 +162,27 @@ const  generate = async () => {
                     /* Code excerpted. */
                     const el = document.getElementsByClassName("random-audio")
                     el[0].play()
+                    console.log(el)
+                    // if(recorder.state === 'paused') {
+                    //     recorder.resume()
+                    // }
                     navigator.mediaSession.playbackState = "playing";
                 
 
                 });
                 navigator.mediaSession.setActionHandler("pause", () => {
                     /* Code excerpted. */
+                    const el = document.getElementsByClassName("random-audio")
+                    el[0].pause()
+                    recorder.pause()
+                    navigator.mediaSession.playbackState = "paused";
                 });
                 navigator.mediaSession.setActionHandler("stop", () => {
                     /* Code excerpted. */
+                    const el = document.getElementsByClassName("random-audio")
+                    el[0].stop()
+                    recorder.stop()
+                    navigator.mediaSession.playbackState = "inactive";
                 });
                 navigator.mediaSession.setActionHandler("seekbackward", () => {
                     /* Code excerpted. */
@@ -186,18 +199,7 @@ const  generate = async () => {
                 navigator.mediaSession.setActionHandler("nexttrack", () => {
                     /* Code excerpted. */
                 });
-                navigator.mediaSession.setActionHandler("skipad", () => {
-                    /* Code excerpted. */
-                });
-                navigator.mediaSession.setActionHandler("togglecamera", () => {
-                    /* Code excerpted. */
-                });
-                navigator.mediaSession.setActionHandler("togglemicrophone", () => {
-                    /* Code excerpted. */
-                });
-                navigator.mediaSession.setActionHandler("hangup", () => {
-                    /* Code excerpted. */
-                });
+            
             
             })
             .catch((error) => {
