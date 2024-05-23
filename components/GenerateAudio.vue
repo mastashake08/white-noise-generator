@@ -150,57 +150,6 @@ const  generate = async () => {
             }, 360000)
             el.play().then(() => {
                 el.requestPictureInPicture()  
-            /* Set up media session controls, as shown above. */
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: "White Noise",
-                    artist: "Jyrone Parker",
-                    album: "Random White Noise",
-                });
-                navigator.mediaSession.playbackState = "playing";
-                
-                navigator.mediaSession.setActionHandler("play", () => {
-                    /* Code excerpted. */
-                    const el = document.getElementsByClassName("random-audio")
-                    el[0].play()
-                    console.log(el)
-                    // if(recorder.state === 'paused') {
-                    //     recorder.resume()
-                    // }
-                    navigator.mediaSession.playbackState = "playing";
-                
-
-                });
-                navigator.mediaSession.setActionHandler("pause", () => {
-                    /* Code excerpted. */
-                    const el = document.getElementsByClassName("random-audio")
-                    el[0].pause()
-                    recorder.pause()
-                    navigator.mediaSession.playbackState = "paused";
-                });
-                navigator.mediaSession.setActionHandler("stop", () => {
-                    /* Code excerpted. */
-                    const el = document.getElementsByClassName("random-audio")
-                    el[0].stop()
-                    recorder.stop()
-                    navigator.mediaSession.playbackState = "inactive";
-                });
-                navigator.mediaSession.setActionHandler("seekbackward", () => {
-                    /* Code excerpted. */
-                });
-                navigator.mediaSession.setActionHandler("seekforward", () => {
-                    /* Code excerpted. */
-                });
-                navigator.mediaSession.setActionHandler("seekto", () => {
-                    /* Code excerpted. */
-                });
-                navigator.mediaSession.setActionHandler("previoustrack", () => {
-                    /* Code excerpted. */
-                });
-                navigator.mediaSession.setActionHandler("nexttrack", () => {
-                    /* Code excerpted. */
-                });
-            
-            
             })
             .catch((error) => {
             console.error(error);
