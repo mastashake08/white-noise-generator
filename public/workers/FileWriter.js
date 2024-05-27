@@ -11,7 +11,6 @@ async function writeFile(fileHandle, contents) {
 
   // Write the contents of the file to the stream.
   await writable.write(contents);
-  console.log(writable)
   // Close the file and write the contents to disk.
   await writable.close();
 }
@@ -27,7 +26,6 @@ async function setHandles () {
 onmessage =  async(e) => {
     // Retrieve message sent to work from main script
     const message = e.data; 
-    console.log(message)
     const {draftHandle} = await setHandles()   
     switch(message.type) {
         case 'append':
@@ -40,7 +38,6 @@ onmessage =  async(e) => {
 
          
           const file = await draftHandle.getFile();
-          console.log(file)
           const buff = await file.arrayBuffer()
           self.postMessage(buff,[buff]);
           break;
