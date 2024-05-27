@@ -52,7 +52,7 @@ async function save() {
 const stop = () => {
     recorder.stop()
     isDone.value = true
-    save()
+    // save()
 }
 const stopAudio = () => {
     const el = document.getElementsByClassName("random-audio")
@@ -105,6 +105,7 @@ const  generate = async () => {
             };
             recorder.onstop = async (e) => {
                 isDone.value = true
+                save()
                 };
                 el.srcObject = stream
             const audioEl = audioCtx.value.createMediaElementSource(el)
@@ -116,13 +117,54 @@ const  generate = async () => {
             
             source.start();  
             recorder.start();
-            setTimeout(()=>{
-                stop()
-            }, 30000)
+            const actionHandlers = [
+                // play
+                [
+                    "play",
+                    () => {
+                    // play our audio
+                    el.play();
+                    // set playback state
+                    navigator.mediaSession.playbackState = "playing";
+                    // update our status element
+                    //updateStatus(allMeta[index], "Action: play  |  Track is playing…");
+                    },
+                ],
+                [
+                    "pause",
+                    () => {
+                    // pause out audio
+                    el.pause();
+                    // set playback state
+                    navigator.mediaSession.playbackState = "paused";
+                    // update our status element
+                    //updateStatus(allMeta[index], "Action: pause  |  Track has been paused…");
+                    },
+                ],
+                [
+                    "stop",
+                    () => {
+                    // pause out audio
+                    stop();
+                    source.stop()
+                    // set playback state
+                    navigator.mediaSession.playbackState = "inactive";
+                    // update our status element
+                    //updateStatus(allMeta[index], "Action: pause  |  Track has been paused…");
+                    },
+                ]
+            ];
+            for (const [action, handler] of actionHandlers) {
+                try {
+                    navigator.mediaSession.setActionHandler(action, handler);
+                } catch (error) {
+                    console.log(`The media session action "${action}" is not supported yet.`);
+                }
+                }
             el.play()
             .catch((error) => {
             console.error(error);
-            });;
+            });
             isPlaying.value = true
            
     } catch (error) {
