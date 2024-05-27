@@ -16,6 +16,7 @@ const analyser = useState('analyser');
 const canvas = useState('canvas')
 const isDone = ref(false)
 const isPlaying = ref(false)
+let fileWorker;
 let recorder;
 let blob;
 let fh;
@@ -26,47 +27,22 @@ const options = {
       videoBitsPerSecond: 2500000,
       mimeType:  "video/webm",
 };
+
+onMounted(() => {
+    fileWorker = new Worker('workers/FileWriter.js');
+})
+
 async function save() {
     try {
-        if("showSaveFilePicker" in window)   {    const opts = {
-                    types: [
-                    {
-                        description: "White Noise Generator",
-                        accept: { "audio/webm": [".webm"] },
-                        suggestedName: Date.now()+'.webm'
-                    },
-                    ],
-                };
-         fh = await window.showSaveFilePicker(opts); 
-         await writeFile(fh, blob) 
-        } else {
-            const blobUrl = URL.createObjectURL(blob);
-            var link = document.createElement("a"); // Or maybe get it from the current document
-            link.href = blobUrl;
-            link.download = Date.now()+'.webm';
-
-            document.body.appendChild(link); // Or append it whereever you want
-            document.querySelector('a').click()
-        }
+        fileWorker.postMessage({
+                    type: 'download'
+         })
     } catch (error) {
         console.log(error)
     }
     
 }
-function interleave (inputL, inputR) {
-  var length = inputL.length + inputR.length
-  var result = new Float32Array(length)
 
-  var index = 0
-  var inputIndex = 0
-
-  while (index < length) {
-    result[index++] = inputL[inputIndex]
-    result[index++] = inputR[inputIndex]
-    inputIndex++
-  }
-  return result
-}
 async function writeFile(fileHandle, contents) {
   // Create a FileSystemWritableFileStream to write to.
   const writable = await fileHandle.createWritable();
@@ -123,15 +99,23 @@ const  generate = async () => {
             const audioTrack = audioNode.stream.getAudioTracks()[0]
             
             stream.addTrack(audioTrack) 
-            
             recorder = new MediaRecorder(stream, options)
-            recorder.ondataavailable = (e) => {
-                chunks.push(e.data);      
+            recorder.ondataavailable = async (e) => {
+                chunks.push(e.data); 
+                fileWorker.postMessage({
+                    type: 'append',
+                    data: await e.data.arrayBuffer()
+                })     
             };
             recorder.onstop = async (e) => {
                 blob = new File(chunks, 'white-noise.webm',{ type: recorder.mimeType });
                 isDone.value = true
                 save()
+                fileWorker.postMessage({
+                    type: 'close'
+                })
+               
+                
                 
                 };
                 el.srcObject = stream

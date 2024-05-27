@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+  ssr: true,
   devtools: { enabled: true },
   vite: {
     server: {
@@ -67,7 +68,7 @@ export default defineNuxtConfig({
     },
 
     devOptions: {
-      enabled: true,
+      enabled: false,
       suppressWarnings: true,
       navigateFallback: '/',
       navigateFallbackAllowlist: [/^\/$/],
