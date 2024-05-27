@@ -28,13 +28,15 @@ const options = {
 onMounted(() => {
     fileWorker = new Worker('workers/FileWriter.js');
     fileWorker.onmessage = (e) => {
+  
         blob = new File([e.data], 'white-noise.webm',{ type: recorder.mimeType });
-        console.log(blob)  
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.target="_blank"
-        link.download = blob.name
-        link.click()
+        navigator.serviceWorker.ready.then(async (swReg) => {
+            console.log(swReg)
+            const bgFetch = await swReg.backgroundFetch.fetch(
+                "white-noise",
+                [URL.createObjectURL(blob)]
+            );
+            });
     }
 })
 
