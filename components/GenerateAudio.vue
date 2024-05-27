@@ -19,9 +19,6 @@ const isPlaying = ref(false)
 let fileWorker;
 let recorder;
 let blob;
-let fh;
-const timeslice = 5000
-const chunks = []
 const options = {
       audioBitsPerSecond: 128000,
       videoBitsPerSecond: 2500000,
@@ -30,6 +27,15 @@ const options = {
 
 onMounted(() => {
     fileWorker = new Worker('workers/FileWriter.js');
+    fileWorker.onmessage = (e) => {
+        blob = new File([e.data], 'white-noise.webm',{ type: recorder.mimeType });
+        console.log(blob)  
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.target="_blank"
+        link.download = blob.name
+        link.click()
+    }
 })
 
 async function save() {
@@ -43,16 +49,6 @@ async function save() {
     
 }
 
-async function writeFile(fileHandle, contents) {
-  // Create a FileSystemWritableFileStream to write to.
-  const writable = await fileHandle.createWritable();
-
-  // Write the contents of the file to the stream.
-  await writable.write(contents);
-
-  // Close the file and write the contents to disk.
-  await writable.close();
-}
 const stop = () => {
     recorder.stop()
     isDone.value = true
@@ -69,6 +65,7 @@ const stopAudio = () => {
 const  generate = async () => {
     try {
         const el = document.createElement("video")
+        el.controls = "true"
         el.className = "random-audio  text-center mx-auto"
         const btns = document.getElementById('buttons')
         btns.appendChild(el)
@@ -101,22 +98,13 @@ const  generate = async () => {
             stream.addTrack(audioTrack) 
             recorder = new MediaRecorder(stream, options)
             recorder.ondataavailable = async (e) => {
-                chunks.push(e.data); 
                 fileWorker.postMessage({
                     type: 'append',
                     data: await e.data.arrayBuffer()
                 })     
             };
             recorder.onstop = async (e) => {
-                blob = new File(chunks, 'white-noise.webm',{ type: recorder.mimeType });
                 isDone.value = true
-                save()
-                fileWorker.postMessage({
-                    type: 'close'
-                })
-               
-                
-                
                 };
                 el.srcObject = stream
             const audioEl = audioCtx.value.createMediaElementSource(el)
@@ -125,16 +113,13 @@ const  generate = async () => {
             analyser.value.connect(audioNode)
            
             
-              
-            recorder.start(timeslice);
-            source.start();
+            
+            source.start();  
+            recorder.start();
             setTimeout(()=>{
-                recorder.stop()
-                source.stop()
-            }, 360000)
-            el.play().then(() => {
-                el.requestPictureInPicture()  
-            })
+                stop()
+            }, 30000)
+            el.play()
             .catch((error) => {
             console.error(error);
             });;
@@ -144,9 +129,6 @@ const  generate = async () => {
         console.log(error)
     }
 }
-
-
-
 function createBufferSource(buffer, connect) {
     const source = audioCtx.value.createBufferSource();
             // set the buffer in the AudioBufferSourceNode
