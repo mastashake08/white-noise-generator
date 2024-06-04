@@ -1,6 +1,6 @@
 // Get handle to draft file
 
-const fileName = 'white-noise.webm';
+const fileName = 'bounty-hunter.webm';
 
 // …
 async function writeFile(fileHandle, contents) {

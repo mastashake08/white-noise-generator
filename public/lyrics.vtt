@@ -1,0 +1,20 @@
+WEBVTT
+
+STYLE
+::cue {
+  background-image: linear-gradient(to bottom, dimgray, lightgray);
+  color: papayawhip;
+}
+/* Style blocks cannot use blank lines nor "dash dash greater than" */
+
+1
+00:00:00.230 --> 00:00:24.606
+What you gonna do when that bounty on you?
+
+2
+00:00:30.739 --> 00:00:34.074
+Hacker Gang at yo neck know your every move
+
+3
+00:00:34.159 --> 00:00:35.743
+It can be a headless server it can be a head of state

@@ -29,7 +29,7 @@ onMounted(() => {
     fileWorker = new Worker('workers/FileWriter.js');
     fileWorker.onmessage = (e) => {
   
-        blob = new File([e.data], 'white-noise.webm',{ type: recorder.mimeType });
+        blob = new File([e.data], Date.now()+'-bounty-hunter.webm', {type: recorder.mimeType });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.target="_blank"
@@ -62,35 +62,49 @@ const stopAudio = () => {
     }
     stop()
 }
+const setUpText = (video) => {
+    console.log(video)
+    const cues = video.textTracks
+    console.log(cues)
+}
 const  generate = async () => {
     try {
+        const ctx = canvas.value.getContext('2d');
+        
+        const img = new Image()
+        img.onload = function() {
+                     ctx.drawImage(img, 0, 0);
+                 }
+        img.src = '/bounty.JPG';
         const el = document.createElement("video")
+        const text = document.createElement('track')
+        text.kind = "captions"
+        text.src = 'lyrics.vtt'
+        text.type = "text/vtt"
+        text.mode = 'showing'
+        
+        el.appendChild(text)
         el.controls = "true"
         el.className = "random-audio  text-center mx-auto"
+        el.onplay = () => {
+            setUpText(el)
+        }
         const btns = document.getElementById('buttons')
         btns.appendChild(el)
         isDone.value = false
-        const stream = canvas.value.captureStream(60)
-        
+        const stream = canvas.value.captureStream()
+        const req = await fetch('music.m4a')
         const duration = 10
         const channels = 2
         audioCtx.value = new AudioContext()
         analyser.value = audioCtx.value.createAnalyser();
-        const frameCount = 96000 * duration;
-        const myArrayBuffer = audioCtx.value.createBuffer(2, frameCount, 96000);
-        for (let channel = 0; channel < channels; channel++) {
-            // This gives us the actual ArrayBuffer that contains the data
-            const nowBuffering = myArrayBuffer.getChannelData(channel);
-            for (let i = 0; i < frameCount; i++) {
-            // Math.random() is in [0; 1.0]
-            // audio needs to be in [-1.0; 1.0]
-            nowBuffering[i] = Math.random() * 2 - 1;
-        }
-    }
+
+        const myArrayBuffer = await audioCtx.value.decodeAudioData(await req.arrayBuffer());
+        
         
             const source = createBufferSource(myArrayBuffer, analyser.value)
            
-            source.loop = true;
+            source.loop = false;
     
             const audioNode = audioCtx.value.createMediaStreamDestination();
             const audioTrack = audioNode.stream.getAudioTracks()[0]
@@ -175,10 +189,21 @@ function createBufferSource(buffer, connect) {
     const source = audioCtx.value.createBufferSource();
             // set the buffer in the AudioBufferSourceNode
             source.buffer = buffer;
-            source.loop = true
+            source.loop = false
             // connect the AudioBufferSourceNode to the
             // destination so we can hear the sound
             source.connect(connect);
     return source;
 }
 </script>
+<style>
+video::cue {
+  background-image: linear-gradient(to bottom, dimgray, lightgray);
+  color: papayawhip;
+}
+
+video::cue(b) {
+  color: peachpuff;
+}
+
+</style>
